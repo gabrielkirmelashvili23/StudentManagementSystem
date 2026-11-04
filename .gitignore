@@ -1,0 +1,9 @@
+# Visual Studio / .NET build output
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Program data created at runtime
+Data/
