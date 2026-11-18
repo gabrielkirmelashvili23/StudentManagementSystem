@@ -2,24 +2,15 @@
 
 namespace StudentManagementSystem.Models
 {
-    // საბაზო (მშობელი) კლასი ყველა მომხმარებლისთვის.
-    // მისგან მემკვიდრეობით იღებენ: Admin, Lecturer და Student
+    // მშობელი კლასი - Admin, Lecturer და Student მისგან იღებენ მემკვიდრეობით
     internal class User
     {
-        // მომხმარებლის უნიკალური იდენტიფიკატორი
         public int Id { get; set; }
-
-        // მომხმარებლის სახელი და გვარი
         public string Name { get; set; } = string.Empty;
-
-        // მომხმარებლის სახელი სისტემაში შესასვლელად (login)
         public string Username { get; set; } = string.Empty;
 
-        // ენკაფსულაცია: პაროლი ინახება დახურულ (private) ველში,
-        // გარედან მასთან წვდომა მხოლოდ Password property-ით არის შესაძლებელი
+        // პაროლი უნდა იყოს მინიმუმ 8 სიმბოლო
         private string _password = string.Empty;
-
-        // Password property: set ამოწმებს, რომ პაროლი იყოს მინიმუმ 8 სიმბოლო
         public string Password
         {
             get
@@ -39,23 +30,20 @@ namespace StudentManagementSystem.Models
             }
         }
 
-        // მომხმარებლის როლი - გარედან შეცვლა შეუძლებელია (private set),
-        // მნიშვნელობას იღებს მხოლოდ კონსტრუქტორიდან
+        // როლს მხოლოდ კონსტრუქტორი ანიჭებს
         public UserRole Role { get; private set; }
 
-        // ცარიელი კონსტრუქტორი
         public User()
         {
 
         }
 
-        // კონსტრუქტორი მხოლოდ როლით - იყენებენ შვილობილი კლასების ცარიელი კონსტრუქტორები
+        // ამას იძახებენ შვილობილი კლასების ცარიელი კონსტრუქტორები
         public User(UserRole role)
         {
             Role = role;
         }
 
-        // სრული კონსტრუქტორი
         public User(int id, string name, string username, string password, UserRole role)
         {
             Id = id;
@@ -65,28 +53,25 @@ namespace StudentManagementSystem.Models
             Role = role;
         }
 
-        // მეთოდი ამოწმებს, ემთხვევა თუ არა შეყვანილი პაროლი შენახულს.
-        // ასე პაროლის შემოწმება ხდება კლასის შიგნით (ენკაფსულაცია)
+        // CheckPassword - პაროლი მოწმდება კლასის შიგნით
         public bool CheckPassword(string password)
         {
             return _password == password;
         }
 
-        // ვირტუალური მეთოდი (პოლიმორფიზმი):
-        // virtual ნიშნავს, რომ შვილობილ კლასს შეუძლია ამ მეთოდის გადაწერა (override)
+        // ShowInfo - შვილობილი კლასები ამას გადაწერენ (override)
         public virtual void ShowInfo()
         {
             Console.WriteLine($"[{Id}] {Name} | username: {Username} | roli: {Role}");
         }
 
-        // ვირტუალური მეთოდი: აბრუნებს მომხმარებლის მონაცემებს ფაილში შესანახად,
-        // ველები გაყოფილია '|' სიმბოლოთი. შვილობილი კლასები ამატებენ საკუთარ ველებს
+        // ToFileLine - ფაილში შესანახი ხაზი, ველები '|'-ით
         public virtual string ToFileLine()
         {
             return $"{Role}|{Id}|{Name}|{Username}|{Password}";
         }
 
-        // ToString მეთოდის გადაწერა - აბრუნებს მომხმარებლის მოკლე აღწერას
+        // ToString
         public override string ToString()
         {
             return $"[{Id}]: {Name}, {Role}.";

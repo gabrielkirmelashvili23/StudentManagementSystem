@@ -2,9 +2,6 @@
 using StudentManagementSystem.Managers;
 using StudentManagementSystem.Models;
 using StudentManagementSystem.Models.Enums;
-using System.Text;
-
-
 
 FileManager fileManager = new FileManager();
 
@@ -22,6 +19,7 @@ string mainMenuText = "\nmtavari menu: \n" +
 
 bool wantToExit = false;
 
+// მთავარი მენიუ
 do
 {
     int userChoice = ReadMenuChoice(mainMenuText, 2);
@@ -38,8 +36,7 @@ do
 } while (!wantToExit);
 
 
-//  სისტემაში შესვლა 
-
+// შესვლა, მაქსიმუმ 3 მცდელობა
 void LoginMenu()
 {
     int maxAttempts = 3;
@@ -81,10 +78,7 @@ void LoginMenu()
 }
 
 
-// ===================== ადმინის და ლექტორის მენიუ =====================
-
-// ლექტორის მენიუ. თუ isAdmin = true, ემატება ლექტორების მართვის პუნქტები.
-// ასე ერთი და იგივე კოდი ორივე როლისთვის მუშაობს და არ მეორდება
+// ლექტორის მენიუ, ადმინს ემატება ლექტორების მართვა (isAdmin)
 void StaffMenu(bool isAdmin)
 {
     string menuText = "\nsheiyvane ricxvi shesabamisi moqmedebistvis: \n" +
@@ -96,7 +90,6 @@ void StaffMenu(bool isAdmin)
         "6. statistika\n" +
         "7. studentis report failis sheqmna\n";
 
-    // ბოლო პუნქტი ყოველთვის "გამოსვლაა"
     int logoutChoice = 8;
 
     if (isAdmin)
@@ -122,7 +115,7 @@ void StaffMenu(bool isAdmin)
         }
         else
         {
-            // ყველა მოქმედება try ბლოკშია, რომ შეცდომამ პროგრამა არ გააჩეროს
+            // შეცდომამ პროგრამა არ უნდა გააჩეროს
             try
             {
                 switch (userChoice)
@@ -187,14 +180,13 @@ void StaffMenu(bool isAdmin)
     } while (loggedIn);
 }
 
-// ახალი სტუდენტის დამატება: სახელი, სიის ნომერი და შეფასება
+// AddStudentMenu
 void AddStudentMenu()
 {
     string name = ReadText("sheiyvane studentis saxeli da gvari: ", 2);
     int rollNumber = ReadPositiveNumber("sheiyvane siis nomeri: ");
 
-    // სიის ნომერს მაშინვე ვამოწმებთ, რომ მომხმარებელმა ზედმეტი არ აკრიფოს.
-    // ასევე ვამოწმებთ, რომ ავტომატური username (მაგ. s107) სხვას არ ჰქონდეს
+    // ნომერს მაშინვე ვამოწმებთ, შეფასებამდე
     while (studentManager.RollNumberExists(rollNumber) || userManager.UsernameExists($"s{rollNumber}"))
     {
         Console.WriteLine($"siis nomeri {rollNumber} ukve dakavebulia, sheiyvanet sxva.");
@@ -204,15 +196,13 @@ void AddStudentMenu()
     char grade = ReadGrade("sheiyvane shefaseba (A, B, C, D, E, F): ");
 
     Student student = studentManager.AddStudent(name, rollNumber, grade);
-
-    // ცვლილების შემდეგ ფაილს თავიდან ვწერთ (ფაილის რედაქტირება)
     fileManager.SaveUsers(users);
 
     Console.WriteLine("studenti warmatebit daemata!");
     Console.WriteLine($"shesvlis monacemebi -> username: {student.Username}, paroli: {student.Password}");
 }
 
-// ყველა სტუდენტის ნახვა
+// ShowAllStudentsMenu
 void ShowAllStudentsMenu()
 {
     List<Student> students = studentManager.GetAllStudents();
@@ -231,7 +221,7 @@ void ShowAllStudentsMenu()
     }
 }
 
-// სტუდენტის ძებნა სიის ნომრით
+// SearchStudentMenu
 void SearchStudentMenu()
 {
     int rollNumber = ReadPositiveNumber("sheiyvane saziebeli studentis siis nomeri: ");
@@ -241,25 +231,22 @@ void SearchStudentMenu()
     student.ShowInfo();
 }
 
-// სტუდენტის შეფასების განახლება
+// UpdateGradeMenu
 void UpdateGradeMenu()
 {
     int rollNumber = ReadPositiveNumber("sheiyvane studentis siis nomeri: ");
 
-    // ჯერ ვპოულობთ სტუდენტს, რომ არარსებულზე შეფასება არ ვკითხოთ
     Student student = studentManager.FindByRollNumber(rollNumber);
     Console.WriteLine($"{student.Name}-is mimdinare shefaseba: {student.Grade}");
 
     char newGrade = ReadGrade("sheiyvane axali shefaseba (A, B, C, D, E, F): ");
     studentManager.UpdateGrade(rollNumber, newGrade);
-
-    // ცვლილების შემდეგ ფაილს თავიდან ვწერთ (ფაილის რედაქტირება)
     fileManager.SaveUsers(users);
 
     Console.WriteLine("shefaseba warmatebit ganaxlda!");
     student.ShowInfo();
 
-    // თუ სტუდენტს უკვე აქვს report ფაილი, თავიდან ვწერთ, რომ ძველი შეფასება არ ეწეროს
+    // report-ში ძველი შეფასება რომ არ დარჩეს
     if (fileManager.ReportExists(rollNumber))
     {
         fileManager.CreateReport(student);
@@ -267,12 +254,11 @@ void UpdateGradeMenu()
     }
 }
 
-// სტუდენტის წაშლა სიის ნომრით (დადასტურების შემდეგ)
+// DeleteStudentMenu
 void DeleteStudentMenu()
 {
     int rollNumber = ReadPositiveNumber("sheiyvane wasashleli studentis siis nomeri: ");
 
-    // ჯერ ვაჩვენებთ, ვის ვშლით
     Student student = studentManager.FindByRollNumber(rollNumber);
     student.ShowInfo();
 
@@ -287,15 +273,14 @@ void DeleteStudentMenu()
 
     Console.WriteLine($"studenti {student.Name} warmatebit waishala!");
 
-    // სტუდენტთან ერთად ვშლით მის report ფაილსაც (ფაილის წაშლა)
+    // report ფაილიც იშლება
     if (fileManager.DeleteReport(rollNumber))
     {
         Console.WriteLine("studentis report faili waishala.");
     }
 }
 
-// სტატისტიკა: რაოდენობა, საშუალო ქულა, შეფასებების განაწილება,
-// საუკეთესო სტუდენტები და ჩაბარებული / ვერ ჩაბარებული სტუდენტები
+// StatisticsMenu
 void StatisticsMenu()
 {
     List<Student> students = studentManager.GetAllStudents();
@@ -306,13 +291,13 @@ void StatisticsMenu()
         return;
     }
 
-    Console.WriteLine("========== STATISTIKA ==========");
+    Console.WriteLine("--- statistika ---");
     Console.WriteLine($"studentebis raodenoba: {students.Count}");
 
     double average = studentManager.GetAverageGradePoints();
     Console.WriteLine($"sashualo qula: {average:F2} (A = 5 ... F = 0)");
 
-    // შეფასებების განაწილება: თითოეულ სტუდენტზე ერთი ვარსკვლავი (ჩადგმული ციკლი)
+    // თითო სტუდენტზე ერთი *
     Console.WriteLine("\n--- shefasebebis ganawileba ---");
 
     foreach (IGrouping<char, Student> group in studentManager.GetStudentsGroupedByGrade())
@@ -327,7 +312,6 @@ void StatisticsMenu()
         Console.WriteLine($" ({group.Count()})");
     }
 
-    // საუკეთესო 3 სტუდენტი
     Console.WriteLine("\n--- top 3 studenti ---");
     List<Student> topStudents = studentManager.GetTopStudents(3);
 
@@ -336,7 +320,6 @@ void StatisticsMenu()
         Console.WriteLine($"{i + 1}. {topStudents[i].Name} - {topStudents[i].Grade}");
     }
 
-    // ჩაბარებული და ვერ ჩაბარებული სტუდენტები
     List<Student> passedStudents = studentManager.GetPassedStudents();
     List<Student> failedStudents = studentManager.GetFailedStudents();
 
@@ -346,11 +329,9 @@ void StatisticsMenu()
     {
         Console.WriteLine($"   ver chaabara: {student.Name} (N{student.RollNumber})");
     }
-
-    Console.WriteLine("================================");
 }
 
-// სტუდენტის report card ფაილის შექმნა (ფაილის შექმნა)
+// CreateReportMenu
 void CreateReportMenu()
 {
     int rollNumber = ReadPositiveNumber("sheiyvane studentis siis nomeri: ");
@@ -362,13 +343,12 @@ void CreateReportMenu()
     Console.WriteLine(fileManager.ReadReport(rollNumber));
 }
 
-// ახალი ლექტორის დამატება (მხოლოდ ადმინისთვის)
+// AddLecturerMenu (ადმინი)
 void AddLecturerMenu()
 {
     string name = ReadText("sheiyvane leqtoris saxeli da gvari: ", 2);
     string username = ReadText("sheiyvane leqtoris username: ", 3);
 
-    // username უნიკალური უნდა იყოს
     while (userManager.UsernameExists(username))
     {
         Console.WriteLine($"username {username} ukve dakavebulia, sheiyvanet sxva.");
@@ -384,8 +364,7 @@ void AddLecturerMenu()
     Console.WriteLine("leqtori warmatebit daemata!");
 }
 
-// ყველა მომხმარებლის ნახვა (მხოლოდ ადმინისთვის).
-// პოლიმორფიზმი: ერთი და იგივე ShowInfo() სხვადასხვა ტიპზე სხვადასხვა შედეგს იძლევა
+// ShowAllUsersMenu (ადმინი) - ShowInfo() ყველა ტიპზე თავისებურად მუშაობს
 void ShowAllUsersMenu()
 {
     List<User> allUsers = userManager.GetAllUsers();
@@ -398,7 +377,7 @@ void ShowAllUsersMenu()
     }
 }
 
-// ლექტორის წაშლა username-ით (მხოლოდ ადმინისთვის)
+// DeleteLecturerMenu (ადმინი)
 void DeleteLecturerMenu()
 {
     List<Lecturer> lecturers = userManager.GetAllLecturers();
@@ -431,9 +410,7 @@ void DeleteLecturerMenu()
 }
 
 
-// ===================== სტუდენტის მენიუ =====================
-
-// სტუდენტის მენიუ: სტუდენტს მხოლოდ საკუთარი მონაცემების ნახვა შეუძლია
+// სტუდენტის მენიუ - მხოლოდ საკუთარი მონაცემები
 void StudentMenu(Student student)
 {
     string menuText = "\nsheiyvane ricxvi shesabamisi moqmedebistvis: \n" +
@@ -455,7 +432,7 @@ void StudentMenu(Student student)
                 Console.WriteLine($"username: {student.Username}");
                 break;
             case 2:
-                // report ფაილი შეიძლება ჯერ არ იყოს შექმნილი - ამას try/catch აკონტროლებს
+                // report შეიძლება ჯერ არ იყოს შექმნილი
                 try
                 {
                     Console.WriteLine(fileManager.ReadReport(student.RollNumber));
@@ -474,10 +451,9 @@ void StudentMenu(Student student)
 }
 
 
-// ===================== შეყვანის ვალიდაცია =====================
+// ვალიდაცია
 
-// აჩვენებს მენიუს და კითხულობს არჩევანს 1-დან maxChoice-მდე.
-// არასწორი შეყვანისას ეკითხება თავიდან
+// ReadMenuChoice - არასწორზე თავიდან ეკითხება
 int ReadMenuChoice(string menuText, int maxChoice)
 {
     Console.WriteLine(menuText);
@@ -493,7 +469,7 @@ int ReadMenuChoice(string menuText, int maxChoice)
     return userChoice;
 }
 
-// კითხულობს დადებით მთელ რიცხვს - ეკითხება მანამ, სანამ სწორს არ შეიყვანს
+// ReadPositiveNumber
 int ReadPositiveNumber(string message)
 {
     Console.Write(message);
@@ -509,8 +485,6 @@ int ReadPositiveNumber(string message)
     return number;
 }
 
-// კითხულობს ტექსტს: მინიმუმ minLength სიმბოლო და არ უნდა შეიცავდეს '|'-ს
-// ('|' ფაილში მონაცემების გამყოფად გამოიყენება)
 string ReadText(string message, int minLength)
 {
     Console.Write(message);
@@ -526,7 +500,7 @@ string ReadText(string message, int minLength)
     return text;
 }
 
-// კითხულობს შეფასებას: პატარა ასოსაც იღებს და დიდში გადაჰყავს (a -> A)
+// ReadGrade - a -> A
 char ReadGrade(string message)
 {
     Console.Write(message);
@@ -542,7 +516,7 @@ char ReadGrade(string message)
     return input[0];
 }
 
-// ეკითხება კითხვას და აბრუნებს true-ს მხოლოდ მაშინ, თუ პასუხი "yes"-ია
+// AskYesNo
 bool AskYesNo(string message)
 {
     Console.Write(message);

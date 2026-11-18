@@ -1,10 +1,8 @@
 ﻿namespace StudentManagementSystem.Exceptions
 {
-    // საკუთარი გამონაკლისი (exception), რომელიც ისვრის მაშინ, როცა
-    // ვერ მოიძებნა (მაგ. სტუდენტი ასეთი ნომრით არ არსებობს)
+    // როცა სტუდენტი, ლექტორი ან ფაილი ვერ მოიძებნა
     internal class NotFoundException : Exception
     {
-        // კონსტრუქტორი იღებს შეტყობინებას და გადასცემს მშობელ Exception კლასს
         public NotFoundException(string message) : base(message)
         {
 

@@ -1,6 +1,6 @@
 ﻿namespace StudentManagementSystem.Models.Enums
 {
-    // ენუმერატორი, რომელიც განსაზღვრავს მომხმარებლის როლს სისტემაში
+    // მომხმარებლის როლები
     internal enum UserRole
     {
         Admin,

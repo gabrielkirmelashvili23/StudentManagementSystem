@@ -3,21 +3,13 @@ using StudentManagementSystem.Models;
 
 namespace StudentManagementSystem.Managers
 {
-    // კლასი, რომელიც პასუხისმგებელია ფაილებთან მთელ მუშაობაზე:
-    // საქაღალდეების შექმნა, მომხმარებლების ჩატვირთვა და შენახვა (users.txt),
-    // სტუდენტების report card ფაილების შექმნა, წაკითხვა და წაშლა
+    // ფაილებთან მუშაობა: users.txt და სტუდენტების report ფაილები
     internal class FileManager
     {
-        // საქაღალდე, სადაც ინახება ყველა მონაცემი
         private string _dataFolder;
-
-        // ფაილი, სადაც ინახება ყველა მომხმარებელი (ერთი მომხმარებელი = ერთი ხაზი)
         private string _usersFilePath;
-
-        // საქაღალდე, სადაც ინახება სტუდენტების report card ფაილები
         private string _reportsFolder;
 
-        // ცარიელი კონსტრუქტორი - იყენებს ნაგულისხმევ საქაღალდეს "Data"
         public FileManager()
         {
             _dataFolder = "Data";
@@ -25,7 +17,6 @@ namespace StudentManagementSystem.Managers
             _reportsFolder = _dataFolder + "/Reports";
         }
 
-        // სრული კონსტრუქტორი - საქაღალდის სახელს იღებს პარამეტრად
         public FileManager(string dataFolder)
         {
             _dataFolder = dataFolder;
@@ -33,17 +24,14 @@ namespace StudentManagementSystem.Managers
             _reportsFolder = _dataFolder + "/Reports";
         }
 
-        // მეთოდი კითხულობს მომხმარებლებს ფაილიდან.
-        // თუ ფაილი ჯერ არ არსებობს (პირველი გაშვება), ქმნის მას სატესტო მონაცემებით
+        // LoadUsers - პირველ გაშვებაზე ფაილი იქმნება სატესტო მონაცემებით
         public List<User> LoadUsers()
         {
-            // თუ საქაღალდე არ არსებობს, ვქმნით
             if (!Directory.Exists(_dataFolder))
             {
                 Directory.CreateDirectory(_dataFolder);
             }
 
-            // პირველი გაშვება: ფაილი არ არსებობს -> ვქმნით სატესტო მონაცემებით
             if (!File.Exists(_usersFilePath))
             {
                 List<User> defaultUsers = CreateDefaultUsers();
@@ -53,16 +41,14 @@ namespace StudentManagementSystem.Managers
                 return defaultUsers;
             }
 
-            // ფაილის ყველა ხაზის წაკითხვა მასივში
             string[] lines = File.ReadAllLines(_usersFilePath);
             List<User> users = new List<User>();
 
             for (int i = 0; i < lines.Length; i++)
             {
-                // ცარიელ ხაზებს ვტოვებთ, დანარჩენს ვამუშავებთ
                 if (!string.IsNullOrWhiteSpace(lines[i]))
                 {
-                    // დაზიანებული ხაზი არ აჩერებს პროგრამას - უბრალოდ გამოვტოვებთ
+                    // დაზიანებულ ხაზს ვტოვებთ, პროგრამა არ ჩერდება
                     try
                     {
                         User user = ParseUser(lines[i]);
@@ -78,8 +64,7 @@ namespace StudentManagementSystem.Managers
             return users;
         }
 
-        // მეთოდი ინახავს ყველა მომხმარებელს ფაილში (ძველ შიგთავსს ანაცვლებს ახლით).
-        // ToFileLine() პოლიმორფულია - თითოეული ტიპი საკუთარ ფორმატს აბრუნებს
+        // SaveUsers - ფაილს თავიდან წერს
         public void SaveUsers(List<User> users)
         {
             List<string> lines = users
@@ -89,18 +74,15 @@ namespace StudentManagementSystem.Managers
             File.WriteAllLines(_usersFilePath, lines);
         }
 
-        // ===================== Report card ფაილები =====================
-
-        // მეთოდი აბრუნებს სტუდენტის report ფაილის მისამართს (მაგ. Data/Reports/Student_101.txt)
+        // report ფაილები: Data/Reports/Student_101.txt
         private string GetReportPath(int rollNumber)
         {
             return _reportsFolder + $"/Student_{rollNumber}.txt";
         }
 
-        // მეთოდი ქმნის (ან თავიდან წერს) სტუდენტის report card ფაილს
+        // CreateReport - ქმნის ან თავიდან წერს report ფაილს
         public string CreateReport(Student student)
         {
-            // თუ Reports საქაღალდე არ არსებობს, ვქმნით
             if (!Directory.Exists(_reportsFolder))
             {
                 Directory.CreateDirectory(_reportsFolder);
@@ -113,12 +95,11 @@ namespace StudentManagementSystem.Managers
                 status = "ver chaabara";
             }
 
-            string content = "===== STUDENTIS REPORT CARD =====\n" +
+            string content = "--- STUDENTIS REPORT CARD ---\n" +
                 $"saxeli da gvari: {student.Name}\n" +
                 $"siis nomeri:     {student.RollNumber}\n" +
                 $"shefaseba:       {student.Grade} ({student.GetGradePoints()} qula 5-dan)\n" +
-                $"statusi:         {status}\n" +
-                "=================================";
+                $"statusi:         {status}";
 
             string path = GetReportPath(student.RollNumber);
             File.WriteAllText(path, content);
@@ -126,13 +107,12 @@ namespace StudentManagementSystem.Managers
             return path;
         }
 
-        // მეთოდი ამოწმებს, არსებობს თუ არა სტუდენტის report ფაილი
         public bool ReportExists(int rollNumber)
         {
             return File.Exists(GetReportPath(rollNumber));
         }
 
-        // მეთოდი კითხულობს report ფაილს. თუ არ არსებობს, ისვრის NotFoundException-ს
+        // ReadReport
         public string ReadReport(int rollNumber)
         {
             if (!ReportExists(rollNumber))
@@ -141,7 +121,7 @@ namespace StudentManagementSystem.Managers
             return File.ReadAllText(GetReportPath(rollNumber));
         }
 
-        // მეთოდი შლის report ფაილს (თუ არსებობს). აბრუნებს true-ს, თუ ფაილი წაიშალა
+        // DeleteReport
         public bool DeleteReport(int rollNumber)
         {
             if (!ReportExists(rollNumber))
@@ -153,8 +133,7 @@ namespace StudentManagementSystem.Managers
             return true;
         }
 
-        // მეთოდი ერთ ხაზს გარდაქმნის შესაბამის ობიექტად (Admin, Lecturer ან Student).
-        // ხაზის ფორმატი: Role|Id|Name|Username|Password|... (დამატებითი ველები)
+        // ხაზის ფორმატი: Role|Id|Name|Username|Password|...
         private User ParseUser(string line)
         {
             string[] parts = line.Split('|');
@@ -180,8 +159,7 @@ namespace StudentManagementSystem.Managers
             }
         }
 
-        // მეთოდი ქმნის სატესტო მონაცემებს პირველი გაშვებისთვის,
-        // რომ პროგრამის დემონსტრაცია არასდროს იყოს ცარიელი
+        // სატესტო მონაცემები პირველი გაშვებისთვის
         private List<User> CreateDefaultUsers()
         {
             List<User> users = new List<User>()
