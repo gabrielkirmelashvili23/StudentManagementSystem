@@ -1,32 +1,27 @@
-﻿// პროგრამის მთავარი ფაილი: მთავარი მენიუ, სისტემაში შესვლა (login)
-// და თითოეული როლის (ადმინი, ლექტორი, სტუდენტი) მენიუ.
-
-using StudentManagementSystem.Exceptions;
+﻿using StudentManagementSystem.Exceptions;
 using StudentManagementSystem.Managers;
 using StudentManagementSystem.Models;
 using StudentManagementSystem.Models.Enums;
+using System.Text;
 
-// ფაილების მენეჯერი: პროგრამის დაწყებისას ყველა მომხმარებელი იტვირთება ფაილიდან
+
+
 FileManager fileManager = new FileManager();
 
-// ყველა მომხმარებლის საერთო სია
 List<User> users = fileManager.LoadUsers();
 Console.WriteLine($"chaitvirta {users.Count} momxmarebeli.");
 
-// ორივე მენეჯერი იღებს ერთსა და იმავე საერთო სიას
 StudentManager studentManager = new StudentManager(users);
 UserManager userManager = new UserManager(users);
 
-Console.WriteLine("\n===== STUDENTEBIS MARTVIS SISTEMA =====");
+Console.WriteLine("\n STUDENTEBIS MARTVIS SISTEMA ");
 
-// მთავარი მენიუს ტექსტი
 string mainMenuText = "\nmtavari menu: \n" +
     "1. shesvla\n" +
     "2. gasvla\n";
 
 bool wantToExit = false;
 
-// მთავარი ციკლი: მეორდება, სანამ მომხმარებელი არ აირჩევს გასვლას
 do
 {
     int userChoice = ReadMenuChoice(mainMenuText, 2);
@@ -43,10 +38,8 @@ do
 } while (!wantToExit);
 
 
-// ===================== სისტემაში შესვლა =====================
+//  სისტემაში შესვლა 
 
-// სისტემაში შესვლა: მაქსიმუმ 3 მცდელობა.
-// წარმატების შემთხვევაში მომხმარებელი გადადის თავისი როლის მენიუში
 void LoginMenu()
 {
     int maxAttempts = 3;
@@ -63,7 +56,6 @@ void LoginMenu()
             User user = userManager.Login(username, password);
             Console.WriteLine($"\nmogesalmebit, {user.Name}! (roli: {user.Role})");
 
-            // როლის მიხედვით ვხსნით შესაბამის მენიუს
             switch (user.Role)
             {
                 case UserRole.Admin:
@@ -73,7 +65,6 @@ void LoginMenu()
                     StaffMenu(false);
                     break;
                 case UserRole.Student:
-                    // ვიცით, რომ ეს ობიექტი სინამდვილეში Student-ია (explicit casting)
                     StudentMenu((Student)user);
                     break;
             }
